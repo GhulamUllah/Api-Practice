@@ -1,22 +1,24 @@
 import { Send } from '@mui/icons-material'
-import { Alert, Button, CircularProgress, TextField } from '@mui/material'
-import axios from 'axios'
+import { Box, Button, CircularProgress, Dialog, DialogActions, DialogTitle, TextField } from '@mui/material'
 import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { upadateproduct } from '../../Redux/reducer/productaction'
 
-export default function EditProduct({auth,setauth,prod,setprod,product,setproduct}) {
-  console.log(product)
+export default function EditProduct({open,setOpen}) {
+  let product=useSelector((state)=>state.product.products)
+  let prod=useSelector((state)=>state.product.product)
+  let loading=useSelector((state)=>state.product.loading)
+
+  let dispatch=useDispatch()
     let [productTitle,setproductTitle]=useState()
     let [productDescription,setproductDescription]=useState()
     let [sid,setsid]=useState()
-    let [loading,setloading]=useState(false)
-    let [errors,seterrors]=useState()
     let [brand,setbrand]=useState()
     let [price,setprice]=useState()
     let [catagery,setcatagery]=useState()
     let [images,setimages]=useState()
     let [instock,setinstock]=useState()
     let [discount,setDiscount]=useState()
-    let [change,setchange]=useState()
     
       useEffect(()=>{
         
@@ -33,43 +35,38 @@ export default function EditProduct({auth,setauth,prod,setprod,product,setproduc
         
         
       },[prod])
-    
-console.log(productTitle) 
+      let handleClickopen=()=>{
+        setOpen(true)
+      }
+      let handleClose=()=>{
+        setOpen(false)
+      }
     let handlechange=async(e)=>{
         e.preventDefault()
-        setloading(true)
-        try {
-            let res=await axios.put(`http://localhost:5000/product/update-product/${sid}`,{  productTitle,
+        let option={
+            productTitle,
             productDescription,
             images,
             price,
             catagery,
             instock,
             brand,
-            discount,})
-            console.log(res.data)
-            seterrors(res.data.message)
-            let update=product?.map((pro)=>pro._id==prod._id ? res?.data?.data : pro)
-            setproduct(update)
-        } catch (error) {
-            console.log(error.response.data.message)
-            seterrors(error.response.data.message)
-
-            setloading(false)
-            
+            discount
         }
+        dispatch(upadateproduct(option,sid))
+   
     }
 
-    if(loading){
-      <CircularProgress sx={{mt:5}}/>
-    }
+    
  
   return (
-    <div className='Login' id='add'>
+    <div>
 
-    <form onSubmit={handlechange}>
-   {errors && (<Alert severity='error'>{errors}</Alert>)}
-    <h2>Edit Product</h2>
+ <Dialog>
+ <form onSubmit={handlechange}>
+ {loading ? <Box><CircularProgress/></Box> :''}
+
+    <DialogTitle open={open} onClose={handleClose}>Edit Product</DialogTitle>
 
     <TextField sx={{mt:2, width:370}} id="outlined-basic" label="Product Title" variant="outlined" value={productTitle ? productTitle : ''} onChange={(e)=>setproductTitle(e.target.value)} />
     <TextField sx={{mt:2, width:370}} id="outlined-basic" label="Product Description" variant="outlined" value={productDescription ? productDescription : ''} onChange={(e)=>setproductDescription(e.target.value)}/>
@@ -79,8 +76,13 @@ console.log(productTitle)
     <TextField sx={{mt:2, width:370}} id="outlined-basic" label="Brand" variant="outlined" value={brand ? brand : ''} onChange={(e)=>setbrand(e.target.value)}/>
     <TextField sx={{mt:2, width:370}} id="outlined-basic" label="Stock" type='number' variant="outlined" value={ instock ? instock : ''} onChange={(e)=>setinstock(e.target.value)}/>
     <TextField sx={{mt:2, width:370}} id="outlined-basic" label="Discount" variant="outlined" value={discount ? discount : ''} onChange={(e)=>setDiscount(e.target.value)}/>
-    <Button sx={{mt:1}} variant='contained' value={sid} type='submit'endIcon={<Send/>}>Update</Button>
+    <Button sx={{mt:1}} variant='contained' value={sid} type='submit'endIcon={<Send/>} onClose={handleClose}>Update</Button>
+    <DialogActions>
+      <Button variant='contained' onClick={handleClose} >Cancel</Button>
+      <Button variant='contained' onClick={handleClose} >Subscribe</Button>
+    </DialogActions>
     </form>
+ </Dialog>
 </div> 
   )
 }

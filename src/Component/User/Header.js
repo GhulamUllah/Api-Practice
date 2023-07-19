@@ -2,7 +2,7 @@ import { Button } from '@mui/material'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
-export default function Header({auth,setauth}) {
+export default function Header() {
   let navigate=useNavigate()
   let handleadd=()=>{
    
@@ -27,8 +27,17 @@ export default function Header({auth,setauth}) {
         <div className='Services'>
         <ul>
             <li onClick={handlep}>Products</li>
-            <li>Services</li>
-            <li>Contact us</li>
+            <li className='dropdown'>Services
+              {/* <ul>
+                <li>Product Service</li>
+                <li>Product Delivery</li>
+                <li>Product Authentication</li>
+                <li>Delivery Fairs</li>
+                <li>Documentation</li>
+                <li>About Us</li>
+              </ul> */}
+            </li>
+            <li>Contacts</li>
 
             <Button variant='contained' onClick={login}>Login</Button>
             <Button variant='contained' onClick={register}>Register</Button>

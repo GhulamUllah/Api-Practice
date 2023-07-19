@@ -1,58 +1,41 @@
-import { Alert, Button, CircularProgress, TextField } from '@mui/material'
-import axios from 'axios'
+import { Button, CircularProgress, TextField } from '@mui/material'
+import { Box } from '@mui/system'
 import React, { useEffect, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
+import { changepassword } from '../../Redux/reducer/authregister'
 
-export default function Changepassword({auth,setauth}) {
+export default function Changepassword() {
+  let auth= useSelector((state)=>state.Auth)
+  let loading= useSelector((state)=>state.Auth.userloading)
+
+  let dispatch = useDispatch()
   let navigate=useNavigate()
     let [name,setname]=useState()
-    let [loading,setloading]=useState(false)
-    let [errors,seterrors]=useState()
     let [password,setpassword]=useState()
     let handlechange=async(e)=>{
         e.preventDefault()
-        setloading(true)
-        try {
-            let res=await axios.post("http://localhost:5000/user/password-change",{oldpassword:name,newpassword:password})
-            console.log(res)
-            localStorage.removeItem('token')
-            setauth({
-              isAuthenticated:false,
-              user:null
-            })
-            seterrors(res.data.message)
-            setloading(false)
-        } catch (error) {
-            console.log(error)
-            seterrors(error.response.data.message)
-            setloading(false)
-            
-        }
+   let option={oldpassword:name,newpassword:password}
+   dispatch(changepassword(option))
     }
     let handleback=()=>{
       navigate('/dashboard')
     }
-    if(loading){
-      <CircularProgress/>
-    }
-   useEffect(()=>{
-    if(!auth?.isAuthenticated){
-      return navigate('/login')
-    }
-   },[auth])
-    console.log(auth)
+   useEffect(()=>{},[auth])
+ 
+  
   return (
     <div className='Login' id='Login'>
 
     <form onSubmit={handlechange}>
-   <Alert severity='error'>{errors}</Alert>
+      {loading ? <Box><CircularProgress/></Box>:''}
     <h2>Change Password</h2>
 
     <TextField  id="outlined-basic" label="Your Current Password" variant="outlined" type='password' onChange={(e)=>setname(e.target.value)} />
     <TextField sx={{mt:2}} id="outlined-basic" label="Your New Password" variant="outlined" type='password' onChange={(e)=>setpassword(e.target.value)}/>
     <div className='btnclass'>
-    <Button sx={{mt:1 ,mr:1}} variant='contained' type='submit'>Change</Button>
-    <Button sx={{mt:1}} variant='contained' onClick={handleback}>Dashboard</Button>
+    <Button sx={{mt:1 ,mr:1}} variant='contained' type='submit' disabled={loading}>Change</Button>
+    <Button sx={{mt:1}} variant='contained' onClick={handleback} disabled={loading}>Dashboard</Button>
     </div>
     </form>
 </div>

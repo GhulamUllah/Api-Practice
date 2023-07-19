@@ -1,15 +1,16 @@
 import { Avatar, Button, Typography } from '@mui/material'
-import zIndex from '@mui/material/styles/zIndex'
-import React from 'react'
+import { Box } from '@mui/system'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import image from './3.jpg'
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+
 
 export default function Autheader() {
   let auth=useSelector((state)=>state.Auth)
   let navigate=useNavigate()
   let handledashboard=()=>{
-    navigate('/dashboard')
+   return navigate('/dashboard')
   }
   let handleadd=()=>{
    
@@ -18,14 +19,12 @@ export default function Autheader() {
     
   }
   let handlep=()=>{
-    navigate('/')
+   return navigate('/')
   }
-  let login=()=>{
-    navigate('/login')
+  let handlecart=()=>{
+   return navigate('/usercart')
   }
-  let register=()=>{
-    navigate('/register')
-  }
+
   return (
     <div className='header'>
         <div className='logo'>
@@ -35,22 +34,27 @@ export default function Autheader() {
         <ul>
             <li onClick={handlep}>Products</li>
             <li>Services</li>
-            <li>Contact us</li>
+            <li><Button onClick={handlecart} variant='contained' endIcon={<ShoppingCartIcon/>}>Cart</Button></li>
+            <li><Button variant='contained' onClick={handleadd}>Add Product</Button></li>
+           <Box onClick={handledashboard}
+           sx={{
+            overflow:'hidden',
+            display:'flex',
+            alignItems:'center',
+            justifyContent:'center',
+            bgcolor:'#1976D2',
+            p:'2px 16px',
+            borderRadius:'5px'
+           }}>
 
-            <div className='btn1'><Button variant='contained' onClick={handleadd} >Add Product</Button></div>
-            <Button sx={{
-              p:1,
-              color:'white',
-              border:'1px dashed white',
-              zIndex:-1
-            }} onClick={handledashboard}>
             <Avatar
   alt="Remy Sharp"
   src={image}
-  sx={{ width: 36, height: 36}} 
+  sx={{ width: 40, height: 40}} 
 />
-<Typography sx={{ml:2}}>{auth?.user?.username}</Typography>
-            </Button>
+<Typography sx={{ml:2, color:'#fff', display:'flex', gap:'4px'}}>Hi: -<strong>{auth.user.username}</strong></Typography>
+</Box>
+            
         </ul>
         </div>
     </div>

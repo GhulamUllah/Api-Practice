@@ -1,76 +1,63 @@
-import logo from './logo.svg';
 import {BrowserRouter,Route,Routes} from 'react-router-dom'
-
 import './App.css';
-import Header from './Component/User/Header';
 import Register from './Component/User/Register';
-import { useEffect, useState } from 'react';
+import React,{ useEffect, useState } from 'react';
 import Setauthtoken from './Component/User/Setheadertoken';
-import axios from 'axios';
-import { CircularProgress } from '@mui/material';
 import Dashboard from './Component/User/Dashboard';
 import Changepassword from './Component/User/Changepassword';
 import Productlist from './Component/Product/productlist';
 import AddProduct from './Component/Product/AddProduct';
 import Login from './Component/User/login';
 import Spacificproduct from './Component/Product/Spacificproduct';
-import Autheader from './Component/User/Authheader';
 import HeaderDecider from './Component/User/HeaderDecider';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { loaduser } from './Redux/reducer/authregister';
+import Alerts from './Layout/alerts';
+import ProtectedRoute from './Layout/ProtectedRoute';
+import { loadcart } from './Redux/reducer/Cartaction';
+import { CombinedState } from 'redux';
+import Usercart from './Component/Cart/Usercart';
 if(localStorage.token){
   Setauthtoken(localStorage.token)
 }
 
 function App() {
+  let [active,setactive]=useState(false)
+let auth = useSelector((state)=>state.Auth)
+console.log(auth)
   let dispatch=useDispatch()
+useEffect(()=>{
+  dispatch(loaduser())
+  dispatch(loadcart())
 
+},[])
 
-
-  let [loading,setloading]=useState(false)
-  let [auth,setauth]=useState(
-    {isAuthenticated :false,
-    user :null,
-    token :localStorage.getItem("token")
+let handle=()=>{
+  setactive(true)
   }
-  )
 
-  let loadsingleproduct=async()=>{
-    setloading(true)
-    try {
-      let single=await axios.get(`http://localhost:5000/product/`)
-      console.log(single)
-    } catch (error) {
-      console.log(error)
-    }
-  }
-  useEffect(()=>{
-    dispatch(loaduser())
-    loadsingleproduct()
-  },[auth])
-  if(loading){
-    <CircularProgress/>
-  }
-  
   return (
 <div className='App'>
+
 <BrowserRouter>
 <HeaderDecider/>
+<Alerts/>
   <Routes>
   <Route path='/'element={<Productlist/>}/>
 
     <Route path='/login'element={<Login />} />
     <Route path='/product/:id' element={<Spacificproduct/>} />
     
-
+    
     <Route path='/register'element={<Register/>}/>
-    <Route path='/dashboard'element={<Dashboard/>}/>
-    <Route path='/changepassword'element={<Changepassword/>}/>
-    <Route path='/addproduct'element={<AddProduct/>}/>
+    <Route path='/dashboard'element={<ProtectedRoute><Dashboard/></ProtectedRoute>}/>
+    <Route path='/changepassword'element={<ProtectedRoute><Changepassword/></ProtectedRoute>}/>
+    <Route path='/addproduct'element={<ProtectedRoute><AddProduct/></ProtectedRoute>}/>
+    <Route path='/products/:id' element={<Spacificproduct/>}/>
+    <Route path='/usercart' element={<Usercart/>}/>
   </Routes>
   
 </BrowserRouter>
-
 </div>
    
   );

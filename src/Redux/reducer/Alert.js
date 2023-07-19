@@ -1,19 +1,22 @@
-import { Alert_controler_error, Alert_controler_success } from "./action/type"
+import { Alert_controler_error, Alert_controler_success, Alert_Off, Alert_On } from "./action/type"
 
 
 
 let initialState={
     message:null,
+    alerts:[]
 }
 export default function Alerts(state=initialState,action){
     switch (action.type) {
-       case Alert_controler_success:
+       case Alert_Off:
         return {
-            message: action.payload.data.message
+            ...state,
+            alerts:  state.alerts.filter((fil)=>fil.id !== action.payload)
         }
-        case Alert_controler_error:
+        case Alert_On: 
             return{
-            message: action.payload
+                ...state,
+            alerts: [...state.alerts,action.payload]
 
             }
     

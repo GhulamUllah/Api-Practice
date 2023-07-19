@@ -1,87 +1,77 @@
-import { Button, CircularProgress, Typography } from '@mui/material'
-import axios from 'axios'
-import { Delete,Edit } from "@mui/icons-material"
-import React, { useEffect, useState } from 'react'
-import { BrowserRouter, Route, Routes, useNavigate, useParams } from 'react-router-dom'
+import { Button, CircularProgress, Link, Typography } from '@mui/material'
+import * as React from 'react'
+import { Delete,Edit, StayPrimaryLandscape } from "@mui/icons-material"
+import  { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import EditProduct from './Editproduct'
-import Spacificproduct from './Spacificproduct'
+import {useDispatch, useSelector} from 'react-redux'
+import { editdata, loadproduct, productdelete, singleproduct } from '../../Redux/reducer/productaction'
+import { Box, Stack } from '@mui/system'
+import { addtocart } from '../../Redux/reducer/Cartaction'
 
-export default function Productlist({auth,setauth}) {
-    let [loading,setloading]=useState(false)
-    let [product,setproduct]=useState()
-    let [delproduct,setdelproduct]=useState()
-    let [prod,setprod]=useState()
-    let [produ,setprodu]=useState()
-    let id=useParams()
-    console.log(id)
+export default function Productlist() {
+    let auth=useSelector((state)=>state.Auth)
+    let product=useSelector((state)=>state.product.products)
+    let loading=useSelector((state)=>state.product.loading)
+let [open,setOpen]=useState(false)
     let navigate=useNavigate()
-    let loadproduct=async()=>{
-        setloading(true)
-        try {
-            let res=await axios.get('http://localhost:5000/product')
-            setproduct(res.data.data)
-            setloading(false)
-        } catch (error) {
-            console.log(error)
-            setloading(false)
-        }
-    }
+    let dispatch=useDispatch()
+
     let handledelete=async(p,id)=>{
         if(!auth.isAuthenticated){
             navigate('/login')
         }
-        console.log(id)
-        setloading(true)
-        try {
-            let det=await axios.delete(`http://localhost:5000/product/delete-product/${p._id}`)
-            setdelproduct(product?.filter((e)=>(product._id==p._id)))
-            console.log(det)
-            setloading(false)
-        } catch (error) {
-            console.log(error)
-            setloading(false)
+     dispatch(productdelete(id))
 
-        }
-
+    }
+    let handlecart=(id)=>{
+        dispatch(addtocart(id))
     }
     let handleedit=(prod)=>{
         if(!auth.isAuthenticated){
             navigate('/login')
         }
-        setprod(prod)
-    }
-    let handledetails=(produ)=>{
-        setprodu(produ)
+        dispatch(editdata(prod))
+        setOpen(true)
     }
     useEffect(()=>{
-        loadproduct()
-    },[delproduct])
+        dispatch(loadproduct())
+    },[])
 
-    if (loading){
-        <CircularProgress/>
-    }
+
   return (
 
     <div className='product'>
 
-        <EditProduct auth={auth} setauth={setauth} prod={prod} setprod={setprod} product={product} setproduct={setproduct}/>
 
         <h1>Hot Products</h1>
 
     <div className='Products'>
-        {product && product.map((e)=>{
-            return <div className='card'>
-                <img className='center' src={e.images && e.images[0] } alt='Error Internet Connection' width="200px" height="250px"/>
-                <Typography>Product Tilte: {e.productTitle}</Typography>
-                <Typography>Product Description: {e.productDescription}</Typography>
-                <Typography>Product Brand: {e.brand}</Typography>
-                <Typography>Product Price: ${e.price}</Typography>
-                <button onClick={()=>handledetails(e)}>Details</button>
-                <Button variant='contained' sx={{mr:2}} endIcon={<Delete/>} onClick={()=>handledelete(e,e._id)}>Delete</Button>
-                <Button variant='contained' endIcon={<Edit/>} onClick={()=>handleedit(e)}>Edit</Button>
-            </div>
-        })}
+    {loading ? <Box sx={{display:'flex',mt:10, justifyContent:'center',alignItems:'center'}}><CircularProgress/></Box> : 
+     product && product.map((e)=>{
+        return <div>
+            <Stack spacing={2} direction='row'>
+            <Box sx={{p:1,backgroundColor: 'primary.dark', '&:hover':{backgroundColor:'primary.main',opacity:[0.6]}}}>
+            <img className='center' src={e.images && e.images[0] } alt='Error Internet Connection' width="200px" height="250px"/>
+            <Typography>Product Tilte: {e.productTitle}</Typography>
+            <Typography>Product Description: {e.productDescription}</Typography>
+            <Typography>Product Brand: {e.brand}</Typography>
+            <Typography>Product Price: ${e.price}</Typography>
+            <Link sx={{display:'block',textAlign:'right', mb:1}} href={`http://localhost:3000/product/${e._id}`} underline='hover'>View Details</Link>
+
+            <Button variant='contained' sx={{mr:2}} endIcon={<Delete/>} onClick={()=>handledelete(e,e._id)}>Delete</Button>
+            <Button variant='contained' endIcon={<Edit/>} onClick={()=>handleedit(e)}>Edit</Button>
+            <Button variant='contained' onClick={()=>handlecart(e._id)}>Buy</Button>
+            </Box>
+            </Stack>
+        </div>
+    })
+    }
+
+       
     </div>
+    <EditProduct open={open} setOpen={setOpen}/>
+
     </div>
   )
 }

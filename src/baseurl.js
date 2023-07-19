@@ -1,0 +1,1 @@
+ export let baseurl="https://api-production-adbb.up.railway.app"
